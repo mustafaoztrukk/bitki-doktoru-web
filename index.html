@@ -290,7 +290,7 @@
 
 <script>
   const API_KEY_STORAGE = 'bitki_doktoru_gemini_key';
-  const MODEL = 'gemini-3.5-flash';
+  const MODEL = 'gemini-2.5-flash-lite';
   const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
   const PROBLEM_LABELS = {
@@ -414,7 +414,7 @@ Kısa, net, uygulanabilir cümleler kullan. Türkçe yanıt ver.`;
 
       if (!response.ok) {
         const errBody = await response.text();
-        throw new Error(`API hatası (${response.status}): ${errBody.slice(0, 300)}`);
+        throw new Error(`API hatası (${response.status}): ${errBody.slice(0, 800)}`);
       }
 
       const data = await response.json();

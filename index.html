@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Bitki Doktoru</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Bitki Doktoru" />
+<meta name="theme-color" content="#2f6d3e" />
+<style>
+  :root {
+    --bg: #f6f7f4;
+    --card: #ffffff;
+    --text: #1c1f1a;
+    --text-secondary: #5f6659;
+    --border: #e2e5dd;
+    --accent: #2f6d3e;
+    --accent-text: #ffffff;
+    --warn-bg: #fdf1e8;
+    --warn-border: #e8c9a3;
+    --warn-text: #8a4a12;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14170f;
+      --card: #1d211a;
+      --text: #edf0e8;
+      --text-secondary: #a3ab99;
+      --border: #2c3126;
+      --accent: #4c9a5f;
+      --accent-text: #0c130d;
+      --warn-bg: #2b2117;
+      --warn-border: #4a3623;
+      --warn-text: #e8b17a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+  .app {
+    width: 100%;
+    max-width: 480px;
+    padding: calc(24px + env(safe-area-inset-top)) 16px calc(48px + env(safe-area-inset-bottom));
+  }
+  h1 {
+    font-size: 24px;
+    margin: 8px 0 4px;
+  }
+  h2 {
+    font-size: 18px;
+    margin: 0 0 2px;
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .disclaimer {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-size: 15px;
+  }
+  .hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+  .row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-text);
+    width: 100%;
+  }
+  .btn-secondary {
+    flex: 1;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-primary:disabled, .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  #preview {
+    width: 100%;
+    border-radius: 12px;
+    display: none;
+    margin-bottom: 12px;
+    max-height: 340px;
+    object-fit: cover;
+  }
+  #status {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 10px 0;
+    display: none;
+  }
+  #result { display: none; }
+  .badge {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    margin: 4px 0;
+  }
+  .urgency {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 6px 0;
+  }
+  .field-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    margin: 14px 0 4px;
+  }
+  .status-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .status-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .status-icon {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+  .status-body b {
+    display: block;
+    font-size: 13px;
+  }
+  .status-body span {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+  ul.tip-list, ul.warn-list {
+    margin: 4px 0 0;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .warn-box {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-top: 6px;
+  }
+  .warn-box .field-title { color: var(--warn-text); margin-top: 0; }
+  .warn-box ul.warn-list { color: var(--warn-text); }
+  #error {
+    display: none;
+    color: #c0392b;
+    font-size: 14px;
+    margin-top: 10px;
+    line-height: 1.4;
+  }
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>🌿 Bitki Doktoru</h1>
+  <div class="subtitle">Fotoğraf yükle — bitki türünü, bakım rehberini ve fotoğrafa özel teşhisi yapay zeka çıkarsın.</div>
+  <div class="disclaimer">
+    Analiz Google Gemini (ücretsiz katman) ile yapılıyor. API anahtarı sadece bu tarayıcıda saklanır, istekler doğrudan telefonundan Google'a gider. Yine de kesin karar için toprağı elinle kontrol etmeni öneririz.
+  </div>
+
+  <div class="card" id="installCard" style="display:none;">
+    <div id="installText" style="font-size:13px; margin-bottom:10px;"></div>
+    <div class="row">
+      <button class="btn-primary" id="installBtn" style="display:none;">📲 Ana Ekrana Ekle</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <label for="apiKey">Gemini API Anahtarı</label>
+    <input type="password" id="apiKey" placeholder="AIza..." autocomplete="off" />
+    <div class="hint">
+      aistudio.google.com/apikey adresinden ücretsiz alınır (kredi kartı istemez). "Create API key" butonuna bas, çıkan kodu buraya yapıştır.
+    </div>
+  </div>
+
+  <div class="card">
+    <img id="preview" alt="Seçilen fotoğraf" />
+    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none" />
+    <div class="row">
+      <button class="btn-secondary" id="pickBtn">📷 Fotoğraf Seç / Çek</button>
+    </div>
+    <div class="row" style="margin-top: 14px;">
+      <button class="btn-primary" id="analyzeBtn" disabled>Analiz Et</button>
+    </div>
+  </div>
+
+  <div id="status"><span class="spinner"></span>Analiz ediliyor…</div>
+  <div id="error"></div>
+
+  <div class="card" id="result">
+    <h2 id="resPlantName"></h2>
+    <div class="badge" id="resSorun"></div>
+    <div class="urgency" id="resAciliyet"></div>
+    <div id="resDurum" style="font-size: 13px; margin-top: 4px;"></div>
+
+    <div class="field-title">Bakım Durumu</div>
+    <div class="status-grid" id="statusGrid"></div>
+
+    <div class="field-title">Küçük İpuçları</div>
+    <ul class="tip-list" id="tipList"></ul>
+
+    <div class="warn-box">
+      <div class="field-title">Önemli Uyarılar</div>
+      <ul class="warn-list" id="warnList"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_KEY_STORAGE = 'bitki_doktoru_gemini_key';
+  const MODEL = 'gemini-3.5-flash';
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+
+  const PROBLEM_LABELS = {
+    su: '💧 Su ihtiyacı olabilir',
+    gubre: '🌱 Gübre / besin ihtiyacı olabilir',
+    hastalik: '🦠 Hastalık belirtisi olabilir',
+    zararli: '🐛 Zararlı belirtisi olabilir',
+    normal: '✅ Sağlıklı görünüyor',
+  };
+  const URGENCY_LABELS = { dusuk: 'Düşük', orta: 'Orta', yuksek: 'Yüksek' };
+  const URGENCY_COLORS = { dusuk: '#3aa65c', orta: '#d18a1f', yuksek: '#d94b3f' };
+
+  const apiKeyInput = document.getElementById('apiKey');
+  const fileInput = document.getElementById('fileInput');
+  const pickBtn = document.getElementById('pickBtn');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const preview = document.getElementById('preview');
+  const statusEl = document.getElementById('status');
+  const errorEl = document.getElementById('error');
+  const resultEl = document.getElementById('result');
+
+  const savedKey = localStorage.getItem(API_KEY_STORAGE);
+  if (savedKey) apiKeyInput.value = savedKey;
+  apiKeyInput.addEventListener('change', () => {
+    localStorage.setItem(API_KEY_STORAGE, apiKeyInput.value.trim());
+  });
+
+  let base64Image = null;
+
+  pickBtn.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    resultEl.style.display = 'none';
+    errorEl.style.display = 'none';
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      preview.src = dataUrl;
+      preview.style.display = 'block';
+      base64Image = dataUrl.split(',')[1];
+      analyzeBtn.disabled = false;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  const INSTRUCTION = `Sen bir bitki bakım uzmanısın. Sana bir terasta yetiştirilen bitkinin fotoğrafı verilecek.
+
+1. Fotoğraftan bitkinin türünü tahmin et (örn. Domates, Biber, Patlıcan, Kiraz, Salata, süs bitkisi vb. - emin değilsen en yakın tahminini ver).
+2. Yaprak rengi, solgunluk, kuruma, lekeler, kıvrılma gibi görsel ipuçlarına bakarak bitkinin susuzluktan mı, besin eksikliğinden mi, hastalık/zararlıdan mı muzdarip olduğunu, yoksa sağlıklı mı olduğunu belirle.
+3. Bu bitki türü için genel bakım bilgisi ver: ışık, su, budama, gübre ihtiyacı. Su ve gübre kısımlarında fotoğrafta gördüğün belirtileri de dikkate al (örn. kuruma görüyorsan su kısmında bunu belirt).
+4. Bu türe özel 2-3 küçük pratik ipucu ver.
+5. Bu türde sık görülen hastalık/zararlı/dikkat edilmesi gereken 1-3 önemli uyarı ver. Fotoğrafta ciddi bir belirti görüyorsan bunu uyarıların başına ekle.
+
+Kısa, net, uygulanabilir cümleler kullan. Türkçe yanıt ver.`;
+
+  const RESULT_SCHEMA = {
+    type: 'object',
+    properties: {
+      bitki_turu: { type: 'string' },
+      genel_durum: { type: 'string', description: '1-2 cümlelik özet' },
+      sorun_tipi: { type: 'string', enum: ['su', 'gubre', 'hastalik', 'zararli', 'normal'] },
+      aciliyet: { type: 'string', enum: ['dusuk', 'orta', 'yuksek'] },
+      isik: { type: 'string' },
+      su: { type: 'string' },
+      budama: { type: 'string' },
+      gubre: { type: 'string' },
+      ipuclari: { type: 'array', items: { type: 'string' } },
+      uyarilar: { type: 'array', items: { type: 'string' } },
+    },
+    required: ['bitki_turu', 'genel_durum', 'sorun_tipi', 'aciliyet', 'isik', 'su', 'budama', 'gubre', 'ipuclari', 'uyarilar'],
+  };
+
+  function renderStatusItem(icon, label, text) {
+    const item = document.createElement('div');
+    item.className = 'status-item';
+    item.innerHTML = `<span class="status-icon">${icon}</span><span class="status-body"><b>${label}</b><span></span></span>`;
+    item.querySelector('span > span').textContent = text;
+    return item;
+  }
+
+  analyzeBtn.addEventListener('click', async () => {
+    const apiKey = apiKeyInput.value.trim();
+    if (!apiKey) {
+      errorEl.textContent = 'Önce yukarıya Gemini API anahtarını gir.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (!base64Image) return;
+
+    analyzeBtn.disabled = true;
+    statusEl.style.display = 'block';
+    errorEl.style.display = 'none';
+    resultEl.style.display = 'none';
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-goog-api-key': apiKey,
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { text: INSTRUCTION },
+                { inline_data: { mime_type: 'image/jpeg', data: base64Image } },
+              ],
+            },
+          ],
+          generationConfig: {
+            response_mime_type: 'application/json',
+            response_schema: RESULT_SCHEMA,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errBody = await response.text();
+        throw new Error(`API hatası (${response.status}): ${errBody.slice(0, 300)}`);
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error('API hata döndürdü: ' + (data.error.message || JSON.stringify(data.error)));
+      }
+
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!responseText) {
+        throw new Error('Beklenmeyen yanıt formatı — ham yanıt: ' + JSON.stringify(data).slice(0, 4000));
+      }
+
+      const result = JSON.parse(responseText);
+
+      document.getElementById('resPlantName').textContent = result.bitki_turu;
+      document.getElementById('resSorun').textContent = PROBLEM_LABELS[result.sorun_tipi] || result.sorun_tipi;
+      const aciliyetEl = document.getElementById('resAciliyet');
+      aciliyetEl.textContent = 'Aciliyet: ' + (URGENCY_LABELS[result.aciliyet] || result.aciliyet);
+      aciliyetEl.style.color = URGENCY_COLORS[result.aciliyet] || 'inherit';
+      document.getElementById('resDurum').textContent = result.genel_durum;
+
+      const grid = document.getElementById('statusGrid');
+      grid.innerHTML = '';
+      grid.appendChild(renderStatusItem('☀️', 'Işık', result.isik));
+      grid.appendChild(renderStatusItem('💧', 'Su', result.su));
+      grid.appendChild(renderStatusItem('✂️', 'Budama', result.budama));
+      grid.appendChild(renderStatusItem('🌱', 'Gübre', result.gubre));
+
+      const tipList = document.getElementById('tipList');
+      tipList.innerHTML = '';
+      (result.ipuclari || []).forEach((tip) => {
+        const li = document.createElement('li');
+        li.textContent = tip;
+        tipList.appendChild(li);
+      });
+
+      const warnList = document.getElementById('warnList');
+      warnList.innerHTML = '';
+      (result.uyarilar || []).forEach((w) => {
+        const li = document.createElement('li');
+        li.textContent = w;
+        warnList.appendChild(li);
+      });
+
+      resultEl.style.display = 'block';
+    } catch (err) {
+      let msg = 'Hata: ' + err.message;
+      if (err instanceof TypeError) {
+        msg += ' — İnternet bağlantını ve API anahtarını kontrol et.';
+      }
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+    } finally {
+      statusEl.style.display = 'none';
+      analyzeBtn.disabled = false;
+    }
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+
+  const installCard = document.getElementById('installCard');
+  const installText = document.getElementById('installText');
+  const installBtn = document.getElementById('installBtn');
+
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+
+  let deferredInstallPrompt = null;
+
+  if (!isStandalone) {
+    if (isIos) {
+      installCard.style.display = 'block';
+      installText.textContent = 'Bunu bir uygulama gibi kullanmak için: Safari paylaşım menüsünden (⬆️) "Ana Ekrana Ekle"yi seç.';
+    } else {
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        installCard.style.display = 'block';
+        installText.textContent = 'Bunu telefonuna bir uygulama gibi kurabilirsin.';
+        installBtn.style.display = 'block';
+      });
+    }
+  }
+
+  installBtn.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    installCard.style.display = 'none';
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installCard.style.display = 'none';
+  });
+</script>
+</body>
+</html>

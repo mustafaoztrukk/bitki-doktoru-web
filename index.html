@@ -290,7 +290,13 @@
 
 <script>
   const API_KEY_STORAGE = 'bitki_doktoru_openrouter_key';
-  const MODEL = 'google/gemma-4-31b-it:free';
+  // Several free vision models; OpenRouter tries them in order, so if the first
+  // is temporarily rate-limited upstream it automatically falls back to the next.
+  const MODELS = [
+    'nvidia/nemotron-nano-12b-v2-vl:free',
+    'google/gemma-4-31b-it:free',
+    'google/gemma-4-26b-a4b-it:free',
+  ];
   const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
   const PROBLEM_LABELS = {
@@ -404,7 +410,8 @@ SADECE aşağıdaki şemaya uyan geçerli bir JSON nesnesi döndür, başka hiç
           'X-Title': 'Bitki Doktoru',
         },
         body: JSON.stringify({
-          model: MODEL,
+          model: MODELS[0],
+          models: MODELS,
           messages: [
             {
               role: 'user',
@@ -418,6 +425,9 @@ SADECE aşağıdaki şemaya uyan geçerli bir JSON nesnesi döndür, başka hiç
       });
 
       if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('Ücretsiz modeller şu an yoğun. Lütfen birkaç dakika sonra tekrar dene.');
+        }
         const errBody = await response.text();
         throw new Error(`API hatası (${response.status}): ${errBody.slice(0, 800)}`);
       }
